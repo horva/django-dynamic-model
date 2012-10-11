@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.validators import RegexValidator
 from .fields import JSONField
 from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext as _
 from django.conf import settings
 
 
@@ -102,7 +103,7 @@ class DynamicForm(forms.ModelForm):
                 self.fields[name] = field_mapping_case['field'](required=req,
                     widget=field_mapping_case.get('widget'),
                     initial=self.instance.get_extra_field_value(name),
-                    label=verbose_name.capitalize() if verbose_name else \
+                    label=_(verbose_name).capitalize() if verbose_name else \
                         " ".join(name.split("_")).capitalize())
 
     def save(self, force_insert=False, force_update=False, commit=True):
