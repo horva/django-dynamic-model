@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.validators import RegexValidator
 from .fields import JSONField
 from django.core.exceptions import ValidationError
+from django.conf import settings
 
 
 class DynamicModel(models.Model):
@@ -153,6 +154,14 @@ class DynamicSchema(models.Model):
         return cls.objects.get_for_model(model_class, type_value)
 
 
+def limit_choices(init_choices):
+    limited_choices = getattr(settings, 'DYNAMICMODEL_LIMIT_FIELD_TYPES', None)
+    if limited_choices:
+        return [(k, v) for k, v in init_choices if k in limited_choices]
+    else:
+        return init_choices
+
+
 class DynamicSchemaField(models.Model):
     FIELD_TYPES = [
         ('IntegerField', 'Integer number field'),
@@ -169,7 +178,7 @@ class DynamicSchemaField(models.Model):
     name = models.CharField(max_length=100, validators=[RegexValidator(r'^[\w]+$',
         message="Name should contain only alphanumeric characters and underscores.")])
     verbose_name = models.CharField(max_length=100, null=True, blank=True)
-    field_type = models.CharField(max_length=100, choices=FIELD_TYPES)
+    field_type = models.CharField(max_length=100, choices=limit_choices(FIELD_TYPES))
     required = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
