@@ -84,6 +84,7 @@ class DynamicForm(forms.ModelForm):
         ('CharField', {'field': forms.CharField}),
         ('TextField', {'field': forms.CharField, 'widget': forms.Textarea}),
         ('EmailField', {'field': forms.EmailField}),
+        ('BooleanField', {'field': forms.BooleanField}),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -95,6 +96,8 @@ class DynamicForm(forms.ModelForm):
         if self.instance and hasattr(self.instance, 'get_extra_fields'):
             for name, verbose_name, field_type, req, value in self.instance.get_extra_fields():
                 field_mapping_case = dict(self.field_mapping)[field_type]
+                if field_type == 'BooleanField':
+                    req = False
                 self.fields[name] = field_mapping_case['field'](required=req,
                     widget=field_mapping_case.get('widget'),
                     initial=self.instance.get_extra_field_value(name),
@@ -156,6 +159,7 @@ class DynamicSchemaField(models.Model):
         ('CharField', 'One line of text'),
         ('TextField', 'Multiline text input'),
         ('EmailField', 'Email'),
+        ('BooleanField', 'Checkbox'),
     ]
 
     class Meta:
